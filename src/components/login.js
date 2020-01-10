@@ -1,25 +1,29 @@
 import  React,{ Component } from 'react';
 import axios from 'axios';
-import {Route, Redirect } from 'react-router-dom';
-import Dashboard from './dashboard';
+import { Redirect } from 'react-router-dom';
 
 export default class login extends Component {
 
   state = {
-    isLoggedin : false
+    isLoggedin: false,
+    user: '',
+    persons: [],
+    email: '',
+    name:''
   }
   
 onSubmit = event => {
-     event.preventDefault();
+  event.preventDefault();
         const email = this.refs.email.value;
         const password = this.refs.password.value;
         axios.post('http://localhost:8000/login',{email,password})
           .then(res => {
             if (res.data.user) {                
-                this.setState({
-                  isLoggedin: true
-                });
-              }
+              this.setState({
+                isLoggedin: true,
+                user: email
+              });
+            }
             if (res.data.error || res.error) {
                 alert(res.data.error,res.error)
               }
@@ -27,19 +31,29 @@ onSubmit = event => {
           .catch (error => {
           alert(error.response);
           });
-}
+  }
   
+  componentWillMount() {
+    axios.get('http://localhost:8000/')
+      .then(res => {
+        if (this.state.isLoggedin) {
+          console.log(res.data);
+          let persons = res.data;
+          console.log(persons);
+          this.setState({ persons });
+        } 
+        })
+  }
+
   render() {
     if (this.state.isLoggedin) {
-            console.log("logged in");
-      return <Redirect to='/dashboard'
-        // component={Dashboard}
-      />      
-
-      
+      console.log(this.state.user);
+      alert("logged in");
+      localStorage.setItem('user',this.state.user)
+      return <Redirect to='/dashboard'/>      
     }
-    return (
 
+    return (
       <div className="row mt-5">
   <div className="col-md-6 m-auto">
     <div className="card card-body">
@@ -51,18 +65,18 @@ onSubmit = event => {
             typeof="email"
                   id="email"
                   ref="email"
-            // name="email"
+                  required
             className="form-control"
             placeholder="Enter Email"
           />
-        </div>
-        <div className="form-group">
+              </div>
+              <div className="form-group">
           <label >Password</label>
           <input
             typeof="password"
                   id="password"
                   ref="password"
-            // name="password"
+                  required
             className="form-control"
             placeholder="Enter Password"
           />
@@ -71,11 +85,10 @@ onSubmit = event => {
       </form>
       <p className="lead mt-4">
         No Account? <a href="/register">Register</a>
-      </p>
+            </p>
     </div>
   </div>
 </div>
-
     )
   }
 }

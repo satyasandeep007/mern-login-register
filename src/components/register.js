@@ -1,25 +1,39 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-// import { connect } from 'react-redux';
-
+import { Redirect } from 'react-router-dom';
 
 export default class Register extends Component {
+  state = {
+    isRegistered: false
+  }
 
 handleSubmit = event => {
-     event.preventDefault();
-      const email = this.refs.email.value;
-      const password = this.refs.password.value;
-  axios.post('http://localhost:8000/register', { email, password })
+  event.preventDefault();
+  
+  const email = this.refs.email.value;
+  const password = this.refs.password.value;
+  const name = this.refs.name.value;
+  axios.post('http://localhost:8000/register', { email, password , name })
     .then(res => {
-      console.log(res.data);
+      if (res.data) {
+      this.setState({
+        isRegistered : true
+      })  
+      }
     })
     .catch(error => {
-      // console.log(error);
-            return( "User already exits");
+            return(error.response);
     })
   };
   
   render() {
+    if (this.state.isRegistered) {
+     
+  alert("Registration Success");
+  alert("Please log in to continue");
+    return <Redirect to='/login'/>  
+   }
+
     return (
       <div className="row mt-5">
         <div className="col-md-6 m-auto">
@@ -34,6 +48,16 @@ handleSubmit = event => {
                   ref="email"
                   className="form-control"
                   placeholder="Enter Email"
+                />
+              </div>
+              <div className="form-group">
+                <label >Name</label>
+                <input
+                  type="name"
+                  id="name"
+                  ref="name"
+                  className="form-control"
+                  placeholder="Enter Name"
                 />
               </div>
               <div className="form-group">
@@ -57,18 +81,3 @@ handleSubmit = event => {
     )
   }
 }
-
-// const mapStateToProps = (state) => {
-//   return {
-//     email: state.email,
-//     password: state.password
-//     }
-// }
-
-// const mapDispatchToProps = (dispatch) => {
-//   return {
-//     matchName: () => dispatch({ type: 'MATCH_NAME' })  
-//   }    
-// }
-
-// export default connect(mapStateToProps, mapDispatchToProps)(Register);
